@@ -1,4 +1,4 @@
-export function timerStart(time) {
+module.exports.timerStart = function (time) {
     // Verify time is no.
     const rendrer = require("./main-rendrer");
     const isNumber = rendrer.isNumeric(time);
@@ -7,8 +7,9 @@ export function timerStart(time) {
     } else {
         const electron = require("electron");
         electron.remote.getCurrentWindow().minimize();
+        setTimeout(100, rendrer.takeScreenshotAndSetReminder(time));
         rendrer.takeScreenshotAndSetReminder(time);
-        // setTimeout(100, remote.getCurrentWindow().close());
+        setTimeout(300, remote.getCurrentWindow().close());
     }
 
 }
