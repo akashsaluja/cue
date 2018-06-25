@@ -1,0 +1,21 @@
+{
+    "name": "cue",
+    "version": "0.0.1",
+    "main": "main.js",
+    "dependencies": {
+        "install": "^0.11.0",
+        "nedb": "^1.8.0",
+        "ramda": "^0.25.0",
+        "uuid": "^3.1.0"
+    },
+    "author": {
+        "name": "Akashdeep Saluja",
+        "email": "akashsaluja@outlook.com"
+    },
+    "scripts": {
+        "start": "rm -rf dist/ && tsc && electron dist/main.js"
+    },
+    "devDependencies": {
+        "electron": "2.0.2"
+    }
+}

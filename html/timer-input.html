@@ -1,0 +1,17 @@
+<head>
+    <link rel="stylesheet" type="text/css" href="../css/styles.css">
+    <link rel="stylesheet" type="text/css" href="../css/bootstrap.min.css">
+    <script src="../dist/js/timer-ui.js"></script>
+    <script>
+
+        function keyPressed(event) {
+            if (event.keyCode == 13) { //enter pressed
+                var tb = document.getElementById("timer-textbox");
+                timerStart(tb.value);
+            }
+        }
+    </script>
+</head>
+<form>
+    <input id="timer-textbox" type="text" class="form-control input-lg" name="timer" placeholder="Enter Time in Minutes" onkeypress="keyPressed(event)">
+</form>
