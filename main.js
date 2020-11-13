@@ -8,7 +8,6 @@ const ramda = require("ramda");
 let win;
 
 function createWindow() {
-    new electron.Notification({ title: "Cue", body: "Hello" }).show();
     win = new electron.BrowserWindow({ width: 800, height: 600 })
     win.loadURL(url.format({
         pathname: path.join(__dirname, './index.html'),
@@ -27,6 +26,7 @@ function createWindow() {
     // };
     // createNotification(reminder);
     win.webContents.openDevTools();
+    win.minimize();
 }
 
 /**
@@ -51,7 +51,6 @@ function screenshotProxy30() {
  * Creates a notification to show to user for a reminder
  */
 function createNotification(reminder) {
-    console.log(new electron.BrowserView());
     const notification = new electron.Notification({ title: "Cue", body: "Hello" });
     // Open a new window when the notification is clicked
 
@@ -60,12 +59,16 @@ function createNotification(reminder) {
 }
 
 function getClickHandler(reminder) {
+    console.log("Notification clicked");
     const func = ramda.curry(handleClick);
     return func(reminder);
 }
 function handleClick(reminder, event) {
-    console.log("Reminder for: " + reminder.imgPath);
+    console.log("Reminder for: " + reminder);
+    console.log(win.webContents);
     win.webContents.send('notificationClick', [reminder]);
+    imageWindow = new electron.BrowserWindow({ width: 800, height: 600 });
+    imageWindow.loadURL("file:///" + reminder.imgPath);
 }
 
 electron.ipcMain.on('raise-notification', function (event, arg) {
@@ -74,14 +77,16 @@ electron.ipcMain.on('raise-notification', function (event, arg) {
 
 function openTimerWindow() {
     // arg is reminder
-    let win = new electron.BrowserWindow({ width: 200, height: 46, frame: false });
-    win.loadURL(url.format({
+    let timerWindow = new electron.BrowserWindow({ width: 200, height: 46, frame: false });
+    timerWindow.loadURL(url.format({
         pathname: path.join(__dirname, '/html/timer-input.html'),
         protocol: 'file:',
         slashes: true
     }));
-    win.webContents.openDevTools();
-    win.show();
+    timerWindow.focusOnWebView();
+    // win.webContents.openDevTools();
+    // timerWindow.focus();
+    timerWindow.show();
 };
 
 

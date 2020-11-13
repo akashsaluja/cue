@@ -4,14 +4,23 @@
 </head>
 <script>
 
+    function setFocusToTextBox() {
+        document.getElementById("timer-textbox").focus();
+    }
+
     function keyPressed(event) {
         if (event.keyCode == 13) { //enter pressed
             var tb = document.getElementById("timer-textbox");
-            require('../js/timer-ui').timerStart(tb.value);
+            var time = tb.value.substring(0, tb.value.length - 1);
+            var unit = tb.value.substring(tb.value.length - 1, tb.value.length);
+            require('../js/timer-ui').timerStart(time, unit);
             event.preventDefault(); // to prevent refresh
         }
     }
 </script>
 <form>
-    <input id="timer-textbox" type="text" class="form-control input-lg" name="timer" placeholder="Enter Time in Minutes" onkeypress="keyPressed(event)">
+
+    <input id="timer-textbox" type="text" class="form-control input-lg" name="timer" placeholder="Enter Time in Minutes" onkeypress="keyPressed(event)"
+        onload="setFocusToTextBox()" style="width: 200px;" autofocus>
+
 </form>

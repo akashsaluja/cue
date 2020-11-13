@@ -5,7 +5,6 @@ const uuid = require("uuid");
 const fs = require("fs")
 const path = require('path');
 
-pollDatastoreForAlerts();
 
 module.exports.takeScreenshotAndSetReminder = function (time) {
     console.log("hello");
@@ -22,7 +21,8 @@ module.exports.takeScreenshotAndSetReminder = function (time) {
                     inceptionTime: Date.now(),
                     timer: time * 60 * 1000,
                     acknowledged: false,
-                    reminderTime: Date.now() + time * 60 * 1000
+                    reminderTime: Date.now() + time * 60 * 1000,
+                    notificationSent: false
                 };
                 repo.db.insert(reminder, function (err, docs) {
                     console.log("Reminder has been persisted");
@@ -36,8 +36,17 @@ electron.ipcRenderer.on('screenshotChannel', (event, arg) => {
 });
 
 electron.ipcRenderer.on('notificationClick', (event, arg) => {
+    console.log("Reached here");
     const reminder = arg[0]; // in minutes
-    window.open("file:///" + reminder.imgPath);
+    // win = new electron.BrowserWindowProxy({ width: 800, height: 600 })
+    // win.loadURL(url.format({
+    //     pathname: "file:///" + reminder.imgPath,
+    //     protocol: 'file:',
+    //     slashes: true
+    // }));
+    // const win = window.open("file:///" + reminder.imgPath);
+    // win.focus();
+    console.log("file:///" + reminder.imgPath);
     const newReminder = Object.assign({}, reminder);
     newReminder.acknowledged = true;
     console.log(reminder);
@@ -64,7 +73,8 @@ electron.ipcRenderer.on('genericTimer', (event, arg) => {
                     inceptionTime: Date.now(),
                     timer: 5 * 60 * 1000, // temporary, default reminder
                     acknowledged: false,
-                    reminderTime: Date.now() + 5 * 60 * 1000
+                    reminderTime: Date.now() + 5 * 60 * 1000,
+                    notificationSent: false
                 };
                 // Dont save it
                 // repo.db.insert(reminder, function (err, docs) {
@@ -76,8 +86,8 @@ electron.ipcRenderer.on('genericTimer', (event, arg) => {
         }));
 });
 
-function pollDatastoreForAlerts() {
-    repo.db.find({ acknowledged: false, reminderTime: { $lte: Date.now() } }, function (err, docs) {
+function poller() {
+    repo.db.find({ acknowledged: false, reminderTime: { $lte: Date.now() }, notificationSent: false }, function (err, docs) {
         console.log(docs);
         // docs.forEach(function(obj) {
         //     ids.push(obj.patientId);
@@ -85,16 +95,27 @@ function pollDatastoreForAlerts() {
         // console.log(ids);
         if (docs != null && docs.length > 0) {
             docs.forEach((reminder) => {
-                createNotification(reminder);
-            })
+                notf(reminder);
+                const newReminder = Object.assign({}, reminder);
+                newReminder.notificationSent = true;
+                repo.db.update(reminder, newReminder, {}, function (error, numReplaced) {
+                    console.log(numReplaced);
+                });
+            });
         }
     });
-    setTimeout(pollDatastoreForAlerts, 60000);
+
+    repo.db.loadDatabase();
+    setTimeout(poller, 5000);
 }
 
-function createNotification(reminder) {
+module.exports.pollDatastoreForAlerts = poller;
+
+function notf(reminder) {
     electron.ipcRenderer.send('raise-notification', reminder);
 }
+module.exports.createNotification = notf;
+
 
 
 function getNameForImage() {
